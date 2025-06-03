@@ -1,18 +1,23 @@
-// ジェスチャーの種類
-// 👍(Thumb_Up), 👎(Thumb_Down), ✌️(Victory), 
-// ☝️(Pointng_Up), ✊(Closed_Fist), 👋(Open_Palm), 
-// 🤟(ILoveYou)
+
 function getCode(left_gesture, right_gesture) {
   let code_array = {
-    "Thumb_Up": 1,
-    "Thumb_Down": 2,
-    "Victory": 3,
-    "Pointing_Up": 4,
-    "Closed_Fist": 5,
-    "Open_Palm": 6,
+    "1": 100,
+    "2": 200,
+    "3": 300,
+    "4": 400,
+    "5": 500,
+    "6": 600,
+    "7": 700,
+    "8": 800,
+    "9": 900,
+    "10": 1000,
+    "11": 1100, 
+    "12":1999,
+    "13": 2222,
   }
-  let left_code = code_array[left_gesture];
-  let right_code = code_array[right_gesture];
+   
+  let left_code = left_gesture ? code_array[left_gesture] : "";
+  let right_code = right_gesture ? code_array[right_gesture] : "";
   // left_codeとright_codeを文字として結合
   let code = String(left_code) + String(right_code);
   return code;
@@ -20,11 +25,11 @@ function getCode(left_gesture, right_gesture) {
 
 function getCharacter(code) {
   const codeToChar = {
-    "11": "a", "12": "b", "13": "c", "14": "d", "15": "e", "16": "f",
-    "21": "g", "22": "h", "23": "i", "24": "j", "25": "k", "26": "l",
-    "31": "m", "32": "n", "33": "o", "34": "p", "35": "q", "36": "r",
-    "41": "s", "42": "t", "43": "u", "44": "v", "45": "w", "46": "x",
-    "51": "y", "52": "z", "53": " ", "54": "backspace"
+    "100200": "a", "100300": "b", "400": "c", "100400": "d", "300": "e", "200": "f",
+    "400500": "g", "100600": "h", "100": "i", "700": "j", "200100": "k", "500": "l",
+    "800800": "m", "800900": "n", "1000": "o", "1001100": "p", "1000100": "q", "8001100": "r",
+    "400400": "s", "100800": "t", "500500": "u", "900": "v", "900900": "w", "22222222": "x",
+    "100900": "y", "200200": "z", "2222": " ", "1999": "backspace"
   };
   return codeToChar[code] || "";
 }
@@ -61,30 +66,46 @@ function setup() {
   gotGestures = function (results) {
     gestures_results = results;
 
-    if (results.gestures.length == 2) {
+
+
+    // 1本または2本の手が認識された場合に対応
+    if (results.gestures.length === 1 || results.gestures.length === 2) {
       if (game_mode.now == "ready" && game_mode.previous == "notready") {
-        // ゲーム開始前の状態から、カメラが起動した後の状態に変化した場合
         game_mode.previous = game_mode.now;
         game_mode.now = "playing";
-        document.querySelector('input').value = ""; // 入力欄をクリア
-        game_start_time = millis(); // ゲーム開始時間を記録
+        document.querySelector('input').value = "";
+        game_start_time = millis();
       }
-      let left_gesture;
-      let right_gesture;
-      if (results.handedness[0][0].categoryName == "Left") {
-        left_gesture = results.gestures[0][0].categoryName;
-        right_gesture = results.gestures[1][0].categoryName;
-      } else {
-        left_gesture = results.gestures[1][0].categoryName;
-        right_gesture = results.gestures[0][0].categoryName;
+      let left_gesture = null;
+      let right_gesture = null;
+
+      // 2本の手が認識された場合
+      if (results.gestures.length === 2) {
+        if (results.handedness[0][0].categoryName == "Left") {
+          left_gesture = results.gestures[0][0].categoryName;
+          right_gesture = results.gestures[1][0].categoryName;
+        } else {
+          left_gesture = results.gestures[1][0].categoryName;
+          right_gesture = results.gestures[0][0].categoryName;
+        }
       }
+      // 1本の手が認識された場合
+      else if (results.gestures.length === 1) {
+        if (results.handedness[0][0].categoryName == "Left") {
+          left_gesture = results.gestures[0][0].categoryName;
+          right_gesture = null;
+        } else {
+          left_gesture = null;
+          right_gesture = results.gestures[0][0].categoryName;
+        }
+      }
+
       let code = getCode(left_gesture, right_gesture);
       let c = getCharacter(code);
 
       let now = millis();
       if (c === lastChar) {
-        if (now - lastCharTime > 1000) {
-          // 1秒以上cが同じ値である場合の処理
+        if (now - lastCharTime > 650) {
           typeChar(c);
           lastCharTime = now;
         }
@@ -92,8 +113,8 @@ function setup() {
         lastChar = c;
         lastCharTime = now;
       }
+    
     }
-
   }
 }
 
