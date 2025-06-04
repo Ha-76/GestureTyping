@@ -105,7 +105,7 @@ function setup() {
 
       let now = millis();
       if (c === lastChar) {
-        if (now - lastCharTime > 650) {
+        if (now - lastCharTime > 550) {
           typeChar(c);
           lastCharTime = now;
         }
